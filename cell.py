@@ -51,14 +51,13 @@ class Cell():
                 )
             self._win.draw_line(bottom_wall)
     
-
     def draw_move(self, to_cell: object, undo=False):
-        path_color: str = ""
+        path_color: str
         if undo:
             path_color = "red"
         else:
             path_color = "gray"
-        
+
         path = Line(
             Point(
                 (self._x1 + self._x2) / 2,
