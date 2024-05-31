@@ -9,7 +9,7 @@ from maze import (
 
 def main():
     win = Window(800, 800)
-    maze = Maze(4, 4, 6, 6, 40, 40, win)
+    maze = Maze(4, 4, 7, 6, 40, 40, win)
     win.wait_for_close()
 
 
