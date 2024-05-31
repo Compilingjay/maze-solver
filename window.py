@@ -18,6 +18,7 @@ class Window():
         self.__canvas = Canvas(width=self._width, height=self._height)
         self.__canvas.pack(expand=True)
         self.__run = False
+        self._background_color = "light gray"
     
     def redraw(self):
         self.__root.update_idletasks()

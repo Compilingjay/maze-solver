@@ -26,7 +26,9 @@ class Maze():
         self._cell_size_y = cell_size_y
         self._win = win
         self._cells = []
+        
         self._create_cells()
+        self._break_entrance_and_exit()
     
     def _create_cells(self) -> None:
         if not self._win:
@@ -66,3 +68,9 @@ class Maze():
             raise RuntimeError("window does not exist")
         
         self._win.redraw()
+    
+    def _break_entrance_and_exit(self) -> None:
+        self._cells[0][0].has_top = False
+        self._cells[self._num_cols-1][self._num_rows-1].has_bottom = False
+        self._draw_cell(0, 0)
+        self._draw_cell(self._num_cols-1, self._num_rows-1)
