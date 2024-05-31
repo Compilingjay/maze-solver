@@ -1,4 +1,4 @@
-import time
+import random
 
 from window import (
     Window,
@@ -17,7 +17,8 @@ class Maze():
             num_cols: int,
             cell_size_x: int,
             cell_size_y: int,
-            win: Window) -> None:
+            win: Window,
+            seed: int | float | str | bytes | bytearray | None = None) -> None:
         self._x1 = x1
         self._y1 = y1
         self._num_rows = num_rows
@@ -25,10 +26,13 @@ class Maze():
         self._cell_size_x = cell_size_x
         self._cell_size_y = cell_size_y
         self._win = win
-        self._cells = []
+        self._cells: list[list[Cell]] = []
+        random.seed(seed)
         
         self._create_cells()
         self._break_entrance_and_exit()
+        self._break_walls_recursive()
+        self._reset_cells_visited()
     
     def _create_cells(self) -> None:
         if not self._win:
@@ -74,3 +78,52 @@ class Maze():
         self._cells[self._num_cols-1][self._num_rows-1].has_bottom = False
         self._draw_cell(0, 0)
         self._draw_cell(self._num_cols-1, self._num_rows-1)
+    
+    def _break_walls_recursive(self, i: int = 0, j: int = 0) -> None:
+        directions: list[(int, int, str)] = []
+        if not i - 1 < 0 and not self._cells[i-1][j].visited:
+            directions.append((i - 1, j, "left"))
+        if not j - 1 < 0 and not self._cells[i][j-1].visited:
+            directions.append((i, j - 1, "up"))
+        if not i + 1 >= self._num_cols and not self._cells[i+1][j].visited:
+            directions.append((i + 1, j, "right"))
+        if not j + 1 >= self._num_rows and not self._cells[i][j+1].visited:
+            directions.append((i, j + 1, "down"))
+        
+        directions_rem = len(directions)
+        while directions_rem > 0:
+            k: int = random.randint(0, directions_rem - 1)
+            dir: set[int, int, str] = directions.pop(k)
+            directions_rem -= 1
+
+            match dir[2]:
+                case "left":
+                    self._break_wall_visited(dir[0], dir[1], "right")
+                case "right":
+                    self._break_wall_visited(dir[0], dir[1], "left")
+                case "up":
+                    self._break_wall_visited(dir[0], dir[1], "down")
+                case "down":
+                    self._break_wall_visited(dir[0], dir[1], "up")
+            self._break_walls_recursive(dir[0], dir[1])
+    
+    def _break_wall_visited(self, i: int, j: int, direction: str) -> None:
+        if self._cells[i][j].visited:
+            return
+        
+        self._cells[i][j].visited = True
+        match direction:
+            case "left":
+                self._cells[i][j].has_left = False
+            case "right":
+                self._cells[i][j].has_right = False
+            case "up":
+                self._cells[i][j].has_top = False
+            case "down":
+                self._cells[i][j].has_bottom = False
+        self._draw_cell(i, j)
+    
+    def _reset_cells_visited(self) -> None:
+        for i in range(self._num_cols):
+            for j in range(self._num_rows):
+                self._cells[i][j].visited = False
