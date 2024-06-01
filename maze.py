@@ -81,14 +81,14 @@ class Maze():
     
     def _break_walls_recursive(self, i: int = 0, j: int = 0) -> None:
         directions: list[(int, int, str)] = []
-        if not i - 1 < 0 and not self._cells[i-1][j].visited:
-            directions.append((i - 1, j, "left"))
-        if not j - 1 < 0 and not self._cells[i][j-1].visited:
-            directions.append((i, j - 1, "up"))
-        if not i + 1 >= self._num_cols and not self._cells[i+1][j].visited:
-            directions.append((i + 1, j, "right"))
-        if not j + 1 >= self._num_rows and not self._cells[i][j+1].visited:
-            directions.append((i, j + 1, "down"))
+        if i > 0 and not self._cells[i-1][j].visited:
+            directions.append((i-1, j, "left"))
+        if j > 0 and not self._cells[i][j-1].visited:
+            directions.append((i, j-1, "up"))
+        if i + 1 < self._num_cols and not self._cells[i+1][j].visited:
+            directions.append((i+1, j, "right"))
+        if j + 1 < self._num_rows and not self._cells[i][j+1].visited:
+            directions.append((i, j+1, "down"))
         
         directions_rem = len(directions)
         while directions_rem > 0:
@@ -127,3 +127,48 @@ class Maze():
         for i in range(self._num_cols):
             for j in range(self._num_rows):
                 self._cells[i][j].visited = False
+    
+    def _solve(self, i: int = 0, j: int = 0):
+        return self._solve_recursive_dfs(i, j)
+
+    def _solve_recursive_dfs(self, i: int, j: int):
+        self._animate()
+        self._cells[i][j].visited = True
+
+        if i == self._num_cols - 1 and j == self._num_rows - 1:
+            return True
+        
+        if (not i - 1 < 0 
+                and not self._cells[i-1][j].visited
+                and not self._cells[i-1][j].has_right):
+            self._cells[i][j].draw_move(self._cells[i-1][j])
+            if self._solve_recursive_dfs(i-1, j):
+                return True
+
+            self._cells[i][j].draw_move(self._cells[i-1][j], undo=True)
+
+        if (not j - 1 < 0 
+                and not self._cells[i][j-1].visited
+                and not self._cells[i][j-1].has_bottom):
+            self._cells[i][j].draw_move(self._cells[i][j-1])
+            if self._solve_recursive_dfs(i, j-1):
+                return True
+            self._cells[i][j].draw_move(self._cells[i][j-1], undo=True)
+        
+        if (not i + 1 >= self._num_cols
+                and not self._cells[i+1][j].visited
+                and not self._cells[i+1][j].has_left):
+            self._cells[i][j].draw_move(self._cells[i+1][j])
+            if self._solve_recursive_dfs(i+1, j):
+                return True
+            self._cells[i][j].draw_move(self._cells[i+1][j], undo=True)
+        
+        if (not j + 1 >= self._num_rows
+                and not self._cells[i][j+1].visited
+                and not self._cells[i][j+1].has_top):
+            self._cells[i][j].draw_move(self._cells[i][j+1])
+            if self._solve_recursive_dfs(i, j+1):
+                return True
+            self._cells[i][j].draw_move(self._cells[i][j+1], undo=True)
+
+        return False
